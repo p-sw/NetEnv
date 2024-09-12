@@ -1,0 +1,8 @@
+{
+  "name": "@netenv/server",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "fastify": "^4.28.1"
+  }
+}
