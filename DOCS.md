@@ -1,11 +1,15 @@
 # Basic Program Structure
 
-* Config
-  * Database Location
-  * SuperUser ID
+* Server Config
+  * SQLite Database Location
+  * SuperUser Email
   * SuperUser Pass
     * Once superuser is initialized, config will not be referenced
   * Binding Host / Port
+
+* Repo Config
+  * API Endpoint URL
+  * Credential Storing Method
 
 * Space
   * Create
