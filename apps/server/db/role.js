@@ -89,7 +89,7 @@ class Role {
    */
    delete() {
      return new Promise((resolve) => {
-       db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
+       this.db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
      })
    }
 }
