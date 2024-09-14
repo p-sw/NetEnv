@@ -2,83 +2,101 @@
  * @typedef {import('sqlite3').Database} Database
  */
 /**
- * @typedef {{ email: string; password: string; }} User
+ * @typedef {{ email: string; password: string; }} IUser
  */
 
-import {sha256} from '../utils/hasher'
+class User {
+  /**
+   * @type {Database}
+   */
+  db;
+  /**
+   * @type {IUser}
+   */
+  data;
 
-/**
- * Find user, and return value of user email.
- * If no user was found, return null.
- *
- * @param {Database} db - sqlite3 Database instance
- * @param {string} email - email of user
- *
- * @returns {Promise<Omit<User, 'password'> | null>}
- */
-export function getUserByEmail(db, email) {
-  return new Promise((resolve) => {
-    db.get('SELECT email FROM Users WHERE email = ?', [email], function (_, r) {
-      if (!r) resolve(null);
-      delete r.password;
-      resolve(r);
+  /**
+  * @param {Database} db
+  * @param {IUser} data
+  */
+  constructor(db, data) {
+    this.db = db;
+    this.data = data;
+  }
+
+  /**
+  * Find user, and return instance of User.
+  * If no user was found, return null.
+  *
+  * @param {Database} db
+  * @param {string} email
+  * @returns {Promise<User | null>}
+  */
+  static findByEmail(db, email) {
+    return new Promise((resolve) => {
+      db.get('SELECT email FROM Users WHERE email = ?', [email], function (_, r) {
+        if (!r) resolve(null);
+        resolve(new User(db, r));
+      });
+    });
+  }
+
+  /**
+   * Insert new User with given data.
+   *
+   * Password should be initialized before creation.
+   * This function will not hash password.
+   *
+   * Email should be unique. this function will not check for unique, and do nothing instead.
+   * You should check them manually via `User.findByEmail`.
+   *
+   * @param {Database} db - sqlite3 Database instance
+   * @param {IUser} user - new user data
+   *
+   * @returns {Promise<User | null>}
+   */
+  static create(db, user) {
+    return new Promise((resolve) => {
+      db.run(`
+        INSERT INTO Users (email, password) VALUES (?, ?)
+      `, [user.email, user.password], function (err) {
+        if (err) resolve(null)
+        resolve(new User(db, user));
+      });
+    });
+  }
+
+  /**
+   * Updates data of user.
+   *
+   * Careful when updating email. You should check them unique by 'User.findByEmail'.
+   *
+   * @param {Partial<IUser>} data - will be applied to user
+   * @returns {Promise<void>}
+   */
+  update(data) {
+    return new Promise((resolve) => {
+      const ud = Object.entries(data);
+      if (ud.length === 0) resolve();
+
+      this.db.run(`UPDATE Users SET ${ud.map(([k]) => k + ' = $' + k).join(', ')} WHERE email = $eq`, {
+        $eq: this.data.email,
+        ...Object.fromEntries(ud.map(([k, v]) => ['$' + k, v]))
+      }, function(err) {
+        if (!err) for (const [k, v] of ud) this.data[k] = v;
+        resolve();
+      })
     })
-  })
-}
+  }
 
-/**
- * Insert new User with given data.
- *
- * Email should be unique. this function will not check for unique, and do nothing instead.
- * You should check them manually via `getUserByEmail`.
- *
- * @param {Database} db - sqlite3 Database instance
- * @param {User} user - new user data
- *
- * @returns {Promise<void>}
- */
-export function createUser(db, user) {
-  return new Promise(async (resolve) => {
-    db.run(`
-      INSERT INTO Users (email, password) VALUES (?, ?)
-    `, [user.email, await sha256(user.password)], resolve);
-  })
-}
-
-/**
- * Updates data of user found by email.
- * If email does not exists, it will do nothing.
- *
- * Also, careful when updating email. You should check them unique by 'getUserByEmail'.
- *
- * @param {Database} db - sqlite3 Database instance
- * @param {string} email - email of user that will be updated
- * @param {Partial<User>} user - will be applied to user
- * @returns {Promise<void>}
- */
-export function updateUser(db, email, user) {
-  return new Promise(async (resolve) => {
-    const ud = Object.entries(user);
-    if (ud.length === 0) resolve();
-
-    db.run(`UPDATE Users SET ${ud.map(([k]) => k + ' = ' + '$' + k).join(', ')} WHERE email = $eq`, {
-      $eq: email,
-      $email: user.email,
-      $password: user.password ? await sha256(user.password) : undefined,
-    }, resolve)
-  })
-}
-
-/**
- * Deletes user found by email.
- * If email does not exists, it will do nothing.
- *
- * @param {Database} db - sqlite3 Database instance
- * @param {string} email - email of user that will be deleted
- * @returns {Promise<void>}
- */
-export function deleteUser(db, email) {
-  return new Promise((resolve) => {
-    db.run(`DELETE FROM Users WHERE email = ?`, [email], resolve);
-  })
+  /**
+   * Deletes user.
+   *
+   * @returns {Promise<void>}
+   */
+  deleteUser() {
+    return new Promise((resolve) => {
+      this.db.run(`DELETE FROM Users WHERE email = ?`, [this.data.email], resolve);
+    })
+  }
 }
