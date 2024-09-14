@@ -2,7 +2,7 @@
  * @typedef {import('sqlite3').Database} Database
  */
 /**
- * @typedef {{ email: string; password: string; }} IUser
+ * @typedef {{ email: string; password: string; roles: { name: string; }[] }} IUser
  */
 
 class User {
@@ -34,9 +34,30 @@ class User {
   */
   static findByEmail(db, email) {
     return new Promise((resolve) => {
-      db.get('SELECT email FROM Users WHERE email = ?', [email], function (_, r) {
+      db.get(`
+        SELECT
+          Users.email,
+          Users.password,
+          json_group_array(
+            json_object(
+              'name', Roles.name
+            )
+          ) as roles
+        FROM Users
+        LEFT JOIN UserRoles ON Users.email = UserRoles.email
+        LEFT JOIN Roles ON UserRoles.roleName = Roles.name
+        WHERE email = ?
+        GROUP BY Users.email
+        `, [email], function (_, r) {
         if (!r) resolve(null);
-        resolve(new User(db, r));
+        resolve(
+          new User(
+            db,
+            {
+              ...r,
+              roles: JSON.parse(row.roles).filter(role => role.name !== null)
+            })
+        );
       });
     });
   }
@@ -51,7 +72,7 @@ class User {
    * You should check them manually via `User.findByEmail`.
    *
    * @param {Database} db - sqlite3 Database instance
-   * @param {IUser} user - new user data
+   * @param {Omit<IUser, 'roles'>} user - new user data
    *
    * @returns {Promise<User | null>}
    */
@@ -61,7 +82,7 @@ class User {
         INSERT INTO Users (email, password) VALUES (?, ?)
       `, [user.email, user.password], function (err) {
         if (err) resolve(null)
-        resolve(new User(db, user));
+        resolve(new User(db, { ...user, roles: [] }));
       });
     });
   }
@@ -71,7 +92,7 @@ class User {
    *
    * Careful when updating email. You should check them unique by 'User.findByEmail'.
    *
-   * @param {Partial<IUser>} data - will be applied to user
+   * @param {Partial<Omit<IUser, 'roles'>>} data - will be applied to user
    * @returns {Promise<void>}
    */
   update(data) {
@@ -99,4 +120,6 @@ class User {
       this.db.run(`DELETE FROM Users WHERE email = ?`, [this.data.email], resolve);
     })
   }
+
+
 }
