@@ -94,7 +94,7 @@ class User {
    *
    * @returns {Promise<void>}
    */
-  deleteUser() {
+  delete() {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM Users WHERE email = ?`, [this.data.email], resolve);
     })
