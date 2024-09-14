@@ -75,7 +75,7 @@ class Role {
       if (ud.length === 0) resolve();
 
       this.db.run(`UPDATE Roles SET ${ud.map(([k]) => k + '= $' + k).join(', ')} WHERE name = $qname`, {
-        $qname: this.name,
+        $qname: this.data.name,
         ...Object.fromEntries(ud.map(([k, v]) => ['$' + k, v])),
       }, function(err) {
         if (!err) for (const [k,v] of Object.entries(data)) this.data[k] = v;
