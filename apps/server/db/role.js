@@ -66,7 +66,7 @@ class Role {
     * Update role data with new data.
     * After successful update, it will update role data.
     *
-    * @param {Role} data - data that will be updated to
+    * @param {Partial<IRole>} data - data that will be updated to
     * @returns {Promise<void>}
     */
   update(data) {
