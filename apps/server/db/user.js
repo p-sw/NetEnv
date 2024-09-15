@@ -129,13 +129,16 @@ export default class User {
   /**
    * Add role to user.
    *
-   * @param {string} roleName
+   * @param {import('./role').default} role
    * @returns {Promise<void>}
    */
-  addRole(roleName) {
+  addRole(role) {
     return new Promise((resolve) => {
-      this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [this.data.email, roleName], (e) => {
-        if (!e) this.data.roles.push({ name: roleName });
+      this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [this.data.email, role.data.name], (e) => {
+        if (!e) {
+          this.data.roles.push(role.data);
+          role.data.users.push(this.data);
+        }
         resolve();
       })
     })
@@ -144,13 +147,16 @@ export default class User {
   /**
    * Remove role from user.
    *
-   * @param {string} roleName
+   * @param {import('./role').default} role
    * @returns {Promise<void>}
    */
-  removeRole(roleName) {
+  removeRole(role) {
     return new Promise((resolve) => {
-      this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [this.data.email, roleName], (e) => {
-        if (!e) this.data.roles = this.data.roles.filter(({ name }) => name !== roleName)
+      this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [this.data.email, role.data.name], (e) => {
+        if (!e) {
+          this.data.roles = this.data.roles.filter(({ name }) => name !== role.data.name);
+          role.data.users = role.data.users.filter(({ email }) => email != this.data.email);
+        }
         resolve();
       })
     })
