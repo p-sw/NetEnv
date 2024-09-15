@@ -108,7 +108,7 @@ export default class User {
       this.db.run(`UPDATE Users SET ${ud.map(([k]) => k + ' = $' + k).join(', ')} WHERE email = $eq`, {
         $eq: this.data.email,
         ...Object.fromEntries(ud.map(([k, v]) => ['$' + k, v]))
-      }, function(err) {
+      }, (err) => {
         if (!err) for (const [k, v] of ud) this.data[k] = v;
         resolve();
       })
