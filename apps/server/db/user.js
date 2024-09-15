@@ -126,5 +126,33 @@ export default class User {
     })
   }
 
+  /**
+   * Add role to user.
+   *
+   * @param {string} roleName
+   * @returns {Promise<void>}
+   */
+  addRole(roleName) {
+    return new Promise((resolve) => {
+      this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [this.data.email, roleName], (e) => {
+        if (!e) this.data.roles.push({ name: roleName });
+        resolve();
+      })
+    })
+  }
 
+  /**
+   * Remove role from user.
+   *
+   * @param {string} roleName
+   * @returns {Promise<void>}
+   */
+  removeRole(roleName) {
+    return new Promise((resolve) => {
+      this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [this.data.email, roleName], (e) => {
+        if (!e) this.data.roles = this.data.roles.filter(({ name }) => name !== roleName)
+        resolve();
+      })
+    })
+  }
 }
