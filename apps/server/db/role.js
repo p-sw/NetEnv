@@ -4,6 +4,9 @@
 /**
  * @typedef {{ name: string; }} IRole
  */
+/**
+ * @typedef {IRole & { users: import('./user').IUser[] }} IRoleRl
+ */
 
 /* ======== Role CRUD ======== */
 
@@ -13,13 +16,13 @@ export default class Role {
    */
   db;
   /**
-   * @type {IRole}
+   * @type {IRoleRl}
    */
   data;
 
   /**
    * @param {Database} db
-   * @param {IRole} data
+   * @param {IRoleRl} data
    */
   constructor(db, data) {
     this.db = db;
@@ -36,9 +39,28 @@ export default class Role {
    */
   static findByName(db, name) {
     return new Promise((resolve) => {
-      db.get(`SELECT * FROM Roles WHERE name = ?`, [name], function (_, row) {
+      db.get(`
+        SELECT
+          Roles.name,
+          json_group_array(
+            json_object(
+              'email', Users.email,
+              'password', Users.password,
+            )
+          ) as users
+        FROM Roles
+        LEFT JOIN UserRoles ON Roles.name = UserRoles.roleName
+        LEFT JOIN Users ON UserRoles.email = Users.email
+        WHERE name = ?
+        GROUP BY Roles.name
+        `, [name], function (_, row) {
         if (!row) resolve(null);
-        resolve(new Role(db, row));
+        resolve(
+          new Role(
+            db,
+            { ...row, roles: JSON.parse(row.users).filter(user => user.email !== null) }
+          )
+        );
       });
     });
   }
@@ -57,7 +79,7 @@ export default class Role {
       db.run(`INSERT INTO Roles VALUES (?)`, [data.name], function(err) {
         if (err) resolve(null);
 
-        resolve(new Role(db, data));
+        resolve(new Role(db, { ...data, users: [] }));
       });
     });
   }
@@ -86,10 +108,48 @@ export default class Role {
 
   /**
    * Delete role.
+   *
+   * @returns {Promise<void>}
    */
   delete() {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
+    })
+  }
+
+  /**
+   * Add user to role.
+   *
+   * @param {import('./user').default} user
+   * @returns {Promise<void>}
+   */
+  addUser(user) {
+    return new Promise((resolve) => {
+      this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [user.data.email, this.data.name], (err) => {
+        if (!err) {
+          this.data.users.push(user.data);
+          user.data.roles.push(this.data);
+        }
+        resolve();
+      });
+    })
+  }
+
+  /**
+   * Remove user from role.
+   *
+   * @param {import('./user').default} user
+   * @returns {Promise<void>}
+   */
+  removeUser(user) {
+    return new Promise((resolve) => {
+      this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [user.data.email, this.data.name], (err) => {
+        if (!err) {
+          this.data.users = this.data.users.filter(({ email }) => email !== user.data.email);
+          user.data.roles = user.data.roles.filter(({ name }) => name !== this.data.name);
+        }
+        resolve()
+      })
     })
   }
 }
