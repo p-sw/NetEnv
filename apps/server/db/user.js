@@ -2,7 +2,12 @@
  * @typedef {import('sqlite3').Database} Database
  */
 /**
- * @typedef {{ email: string; password: string; roles: { name: string; }[] }} IUser
+ * @typedef {{ email: string; password: string;  }} IUser
+ */
+/**
+ * @typedef {IUser & { roles: (import('./role').IRole)[] }} IUserRl
+ *
+ * IUser with relationship
  */
 
 export default class User {
@@ -11,13 +16,13 @@ export default class User {
    */
   db;
   /**
-   * @type {IUser}
+   * @type {IUserRl}
    */
   data;
 
   /**
   * @param {Database} db
-  * @param {IUser} data
+  * @param {IUserRl} data
   */
   constructor(db, data) {
     this.db = db;
@@ -72,7 +77,7 @@ export default class User {
    * You should check them manually via `User.findByEmail`.
    *
    * @param {Database} db - sqlite3 Database instance
-   * @param {Omit<IUser, 'roles'>} user - new user data
+   * @param {IUser} user - new user data
    *
    * @returns {Promise<User | null>}
    */
@@ -92,7 +97,7 @@ export default class User {
    *
    * Careful when updating email. You should check them unique by 'User.findByEmail'.
    *
-   * @param {Partial<Omit<IUser, 'roles'>>} data - will be applied to user
+   * @param {Partial<IUser>} data - will be applied to user
    * @returns {Promise<void>}
    */
   update(data) {
