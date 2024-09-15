@@ -7,7 +7,7 @@
 
 /* ======== Role CRUD ======== */
 
-class Role {
+export default class Role {
   /**
    * @type {Database}
    */

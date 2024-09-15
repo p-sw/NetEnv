@@ -5,7 +5,7 @@
  * @typedef {{ email: string; password: string; roles: { name: string; }[] }} IUser
  */
 
-class User {
+export default class User {
   /**
    * @type {Database}
    */
