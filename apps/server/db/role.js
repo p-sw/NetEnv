@@ -52,15 +52,15 @@ export default class Role {
    * @param {IRole} data - data that will be inserted into
    * @returns {Promise<Role | null>}
    */
-   static create(db, data) {
-     return new Promise((resolve) => {
-       db.run(`INSERT INTO Roles VALUES (?)`, [data.name], function(err) {
-         if (err) resolve(null);
+  static create(db, data) {
+    return new Promise((resolve) => {
+      db.run(`INSERT INTO Roles VALUES (?)`, [data.name], function(err) {
+        if (err) resolve(null);
 
-         resolve(new Role(db, data));
-       });
-     });
-   }
+        resolve(new Role(db, data));
+      });
+    });
+  }
 
    /**
     * Update role data with new data.
@@ -87,9 +87,9 @@ export default class Role {
   /**
    * Delete role.
    */
-   delete() {
-     return new Promise((resolve) => {
-       this.db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
-     })
-   }
+  delete() {
+    return new Promise((resolve) => {
+      this.db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
+    })
+  }
 }
