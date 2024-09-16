@@ -4,7 +4,7 @@
 * @typedef {IRole & { users: import('./user').IUser[] }} IRoleRl
 */
 
-/* ======== Role CRUD ======== */
+import { relational } from './utils';
 
 export default class Role {
   /** @type {Database} */
@@ -50,7 +50,7 @@ export default class Role {
         resolve(
           new Role(
             db,
-            { ...row, roles: JSON.parse(row.users).filter(user => user.email !== null) }
+            { ...row, roles: relational(row.users, 'email') }
           )
         );
       });

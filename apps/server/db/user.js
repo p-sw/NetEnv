@@ -4,6 +4,8 @@
 * @typedef {IUser & { roles: (import('./role').IRole)[] }} IUserRl
 */
 
+import { relational } from './utils';
+
 export default class User {
   /** @type {Database} */
   db;
@@ -50,7 +52,7 @@ export default class User {
             db,
             {
               ...r,
-              roles: JSON.parse(row.roles).filter(role => role.name !== null)
+              roles: relational(row.roles, 'name')
             })
         );
       });
