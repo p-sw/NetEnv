@@ -5,13 +5,9 @@
  */
 
 export default class User {
-  /**
-   * @type {Database}
-   */
+  /** @type {Database} */
   db;
-  /**
-   * @type {IUserRl}
-   */
+  /** @type {IUserRl} */
   data;
 
   /**

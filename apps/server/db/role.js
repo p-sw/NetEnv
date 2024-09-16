@@ -7,13 +7,9 @@
 /* ======== Role CRUD ======== */
 
 export default class Role {
-  /**
-   * @type {Database}
-   */
+  /** @type {Database} */
   db;
-  /**
-   * @type {IRoleRl}
-   */
+  /** @type {IRoleRl} */
   data;
 
   /**
