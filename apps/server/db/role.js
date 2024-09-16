@@ -1,10 +1,6 @@
 /**
  * @typedef {import('sqlite3').Database} Database
- */
-/**
  * @typedef {{ name: string; }} IRole
- */
-/**
  * @typedef {IRole & { users: import('./user').IUser[] }} IRoleRl
  */
 

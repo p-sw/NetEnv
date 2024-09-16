@@ -1,13 +1,7 @@
 /**
  * @typedef {import('sqlite3').Database} Database
- */
-/**
  * @typedef {{ email: string; password: string;  }} IUser
- */
-/**
  * @typedef {IUser & { roles: (import('./role').IRole)[] }} IUserRl
- *
- * IUser with relationship
  */
 
 export default class User {
