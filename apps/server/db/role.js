@@ -43,7 +43,7 @@ export default class Role {
         FROM Roles
         LEFT JOIN UserRoles ON Roles.name = UserRoles.roleName
         LEFT JOIN Users ON UserRoles.email = Users.email
-        WHERE name = ?
+        WHERE Roles.name = ?
         GROUP BY Roles.name
         `, [name], function (_, row) {
         if (!row) resolve(null);
