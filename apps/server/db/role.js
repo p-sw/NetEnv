@@ -1,8 +1,8 @@
 /**
- * @typedef {import('sqlite3').Database} Database
- * @typedef {{ name: string; }} IRole
- * @typedef {IRole & { users: import('./user').IUser[] }} IRoleRl
- */
+* @typedef {import('sqlite3').Database} Database
+* @typedef {{ name: string; }} IRole
+* @typedef {IRole & { users: import('./user').IUser[] }} IRoleRl
+*/
 
 /* ======== Role CRUD ======== */
 
@@ -13,22 +13,22 @@ export default class Role {
   data;
 
   /**
-   * @param {Database} db
-   * @param {IRoleRl} data
-   */
+  * @param {Database} db
+  * @param {IRoleRl} data
+  */
   constructor(db, data) {
     this.db = db;
     this.data = data;
   }
 
   /**
-   * Find role by name, and return instance of the Role.
-   * If no role found, return null.
-   *
-   * @param {Database} db - sqlite3 Database instance
-   * @param {string} name - name of the role
-   * @returns {Promise<Role | null>}
-   */
+  * Find role by name, and return instance of the Role.
+  * If no role found, return null.
+  *
+  * @param {Database} db - sqlite3 Database instance
+  * @param {string} name - name of the role
+  * @returns {Promise<Role | null>}
+  */
   static findByName(db, name) {
     return new Promise((resolve) => {
       db.get(`
@@ -58,14 +58,14 @@ export default class Role {
   }
 
   /**
-   * Create new role with data.
-   * If name is already exists, it will do nothing.
-   * After creation, it will return instance of the Role, or null on error.
-   *
-   * @param {Database} db - sqlite3 Database instance
-   * @param {IRole} data - data that will be inserted into
-   * @returns {Promise<Role | null>}
-   */
+  * Create new role with data.
+  * If name is already exists, it will do nothing.
+  * After creation, it will return instance of the Role, or null on error.
+  *
+  * @param {Database} db - sqlite3 Database instance
+  * @param {IRole} data - data that will be inserted into
+  * @returns {Promise<Role | null>}
+  */
   static create(db, data) {
     return new Promise((resolve) => {
       db.run(`INSERT INTO Roles VALUES (?)`, [data.name], function(err) {
@@ -76,13 +76,13 @@ export default class Role {
     });
   }
 
-   /**
-    * Update role data with new data.
-    * After successful update, it will update role data.
-    *
-    * @param {Partial<IRole>} data - data that will be updated to
-    * @returns {Promise<void>}
-    */
+  /**
+  * Update role data with new data.
+  * After successful update, it will update role data.
+  *
+  * @param {Partial<IRole>} data - data that will be updated to
+  * @returns {Promise<void>}
+  */
   update(data) {
     return new Promise((resolve) => {
       const ud = Object.entries(data);
@@ -99,10 +99,10 @@ export default class Role {
   }
 
   /**
-   * Delete role.
-   *
-   * @returns {Promise<void>}
-   */
+  * Delete role.
+  *
+  * @returns {Promise<void>}
+  */
   delete() {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM Roles WHERE name = ?`, [this.data.name], resolve)
@@ -110,11 +110,11 @@ export default class Role {
   }
 
   /**
-   * Add user to role.
-   *
-   * @param {import('./user').default} user
-   * @returns {Promise<void>}
-   */
+  * Add user to role.
+  *
+  * @param {import('./user').default} user
+  * @returns {Promise<void>}
+  */
   addUser(user) {
     return new Promise((resolve) => {
       this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [user.data.email, this.data.name], (err) => {
@@ -128,11 +128,11 @@ export default class Role {
   }
 
   /**
-   * Remove user from role.
-   *
-   * @param {import('./user').default} user
-   * @returns {Promise<void>}
-   */
+  * Remove user from role.
+  *
+  * @param {import('./user').default} user
+  * @returns {Promise<void>}
+  */
   removeUser(user) {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [user.data.email, this.data.name], (err) => {

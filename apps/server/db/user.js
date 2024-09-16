@@ -1,8 +1,8 @@
 /**
- * @typedef {import('sqlite3').Database} Database
- * @typedef {{ email: string; password: string;  }} IUser
- * @typedef {IUser & { roles: (import('./role').IRole)[] }} IUserRl
- */
+* @typedef {import('sqlite3').Database} Database
+* @typedef {{ email: string; password: string;  }} IUser
+* @typedef {IUser & { roles: (import('./role').IRole)[] }} IUserRl
+*/
 
 export default class User {
   /** @type {Database} */
@@ -58,19 +58,19 @@ export default class User {
   }
 
   /**
-   * Insert new User with given data.
-   *
-   * Password should be initialized before creation.
-   * This function will not hash password.
-   *
-   * Email should be unique. this function will not check for unique, and do nothing instead.
-   * You should check them manually via `User.findByEmail`.
-   *
-   * @param {Database} db - sqlite3 Database instance
-   * @param {IUser} user - new user data
-   *
-   * @returns {Promise<User | null>}
-   */
+  * Insert new User with given data.
+  *
+  * Password should be initialized before creation.
+  * This function will not hash password.
+  *
+  * Email should be unique. this function will not check for unique, and do nothing instead.
+  * You should check them manually via `User.findByEmail`.
+  *
+  * @param {Database} db - sqlite3 Database instance
+  * @param {IUser} user - new user data
+  *
+  * @returns {Promise<User | null>}
+  */
   static create(db, user) {
     return new Promise((resolve) => {
       db.run(`
@@ -83,13 +83,13 @@ export default class User {
   }
 
   /**
-   * Updates data of user.
-   *
-   * Careful when updating email. You should check them unique by 'User.findByEmail'.
-   *
-   * @param {Partial<IUser>} data - will be applied to user
-   * @returns {Promise<void>}
-   */
+  * Updates data of user.
+  *
+  * Careful when updating email. You should check them unique by 'User.findByEmail'.
+  *
+  * @param {Partial<IUser>} data - will be applied to user
+  * @returns {Promise<void>}
+  */
   update(data) {
     return new Promise((resolve) => {
       const ud = Object.entries(data);
@@ -106,10 +106,10 @@ export default class User {
   }
 
   /**
-   * Deletes user.
-   *
-   * @returns {Promise<void>}
-   */
+  * Deletes user.
+  *
+  * @returns {Promise<void>}
+  */
   delete() {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM Users WHERE email = ?`, [this.data.email], resolve);
@@ -117,11 +117,11 @@ export default class User {
   }
 
   /**
-   * Add role to user.
-   *
-   * @param {import('./role').default} role
-   * @returns {Promise<void>}
-   */
+  * Add role to user.
+  *
+  * @param {import('./role').default} role
+  * @returns {Promise<void>}
+  */
   addRole(role) {
     return new Promise((resolve) => {
       this.db.run(`INSERT INTO UserRoles VALUES (?, ?)`, [this.data.email, role.data.name], (e) => {
@@ -135,11 +135,11 @@ export default class User {
   }
 
   /**
-   * Remove role from user.
-   *
-   * @param {import('./role').default} role
-   * @returns {Promise<void>}
-   */
+  * Remove role from user.
+  *
+  * @param {import('./role').default} role
+  * @returns {Promise<void>}
+  */
   removeRole(role) {
     return new Promise((resolve) => {
       this.db.run(`DELETE FROM UserRoles WHERE email = ? AND roleName = ?`, [this.data.email, role.data.name], (e) => {
