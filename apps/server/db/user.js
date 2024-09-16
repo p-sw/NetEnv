@@ -60,10 +60,10 @@ export default class User {
   /**
   * Insert new User with given data.
   *
-  * Password should be initialized before creation.
+  * Password should be hashed before creation.
   * This function will not hash password.
   *
-  * Email should be unique. this function will not check for unique, and do nothing instead.
+  * Email should be unique. this function will not check for redundancy, and do nothing instead.
   * You should check them manually via `User.findByEmail`.
   *
   * @param {Database} db - sqlite3 Database instance
@@ -85,7 +85,9 @@ export default class User {
   /**
   * Updates data of user.
   *
-  * Careful when updating email. You should check them unique by 'User.findByEmail'.
+  * Careful when updating email or password,
+  * It will not do any pre-processing
+  * like email redundancy check or password hashing.
   *
   * @param {Partial<IUser>} data - will be applied to user
   * @returns {Promise<void>}
